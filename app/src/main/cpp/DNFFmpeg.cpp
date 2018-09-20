@@ -15,7 +15,7 @@ void *task_prepare(void *args) {
 
 DNFFmpeg::DNFFmpeg(JavaCallHelper *callHelper, const char *dataSource) {
     this->callHelper = callHelper;
-    this->dataSource = new char[strlen(dataSource)];
+    this->dataSource = new char[strlen(dataSource) + 1];
     strcpy(this->dataSource, dataSource);
 }
 
@@ -35,52 +35,53 @@ void DNFFmpeg::_parpare() {
     LOGE("asdddddddddd");
     formatContext = 0;
     int ret = avformat_open_input(&formatContext, dataSource, 0, 0);
-    if (ret !=0) {
-        LOGE("打开媒体失败:%s",av_err2str(ret));
+    if (ret != 0) {
+        LOGE("打开媒体失败:%s", av_err2str(ret));
         callHelper->onError(THREAD_CHILD, FFMPEG_CAN_NOT_OPEN_URL);
         return;
     }
     ret = avformat_find_stream_info(formatContext, 0);
     if (ret < 0) {
-        LOGE("查找流失败:%s",av_err2str(ret));
+        LOGE("查找流失败:%s", av_err2str(ret));
         callHelper->onError(THREAD_CHILD, FFMPEG_CAN_NOT_FIND_STREAMS);
         return;
     }
     for (int i = 0; i < formatContext->nb_streams; ++i) {
         AVStream *stream = formatContext->streams[i];
-        AVCodecParameters *codecpar = stream ->codecpar;
+        AVCodecParameters *codecpar = stream->codecpar;
         AVCodec *dec = avcodec_find_decoder(codecpar->codec_id);
-        if(dec == NULL){
-            LOGE("查找解码器失败:%s",av_err2str(ret));
+        if (dec == NULL) {
+            LOGE("查找解码器失败:%s", av_err2str(ret));
             callHelper->onError(THREAD_CHILD, FFMPEG_FIND_DECODER_FAIL);
             return;
         }
         AVCodecContext *context = avcodec_alloc_context3(dec);
-        if(context == NULL){
-            LOGE("创建解码上下文失败:%s",av_err2str(ret));
+        if (context == NULL) {
+            LOGE("创建解码上下文失败:%s", av_err2str(ret));
             callHelper->onError(THREAD_CHILD, FFMPEG_ALLOC_CODEC_CONTEXT_FAIL);
             return;
         }
-        ret = avcodec_parameters_to_context(context,codecpar);
-        if(ret < 0){
-            LOGE("设置解码上下文参数失败:%s",av_err2str(ret));
+        ret = avcodec_parameters_to_context(context, codecpar);
+        if (ret < 0) {
+            LOGE("设置解码上下文参数失败:%s", av_err2str(ret));
             callHelper->onError(THREAD_CHILD, FFMPEG_CODEC_CONTEXT_PARAMETERS_FAIL);
             return;
         }
-        ret =  avcodec_open2(context,dec,0);
-        if(ret != 0){
-            LOGE("打开解码器失败:%s",av_err2str(ret));
+        ret = avcodec_open2(context, dec, 0);
+        if (ret != 0) {
+            LOGE("打开解码器失败:%s", av_err2str(ret));
             callHelper->onError(THREAD_CHILD, FFMPEG_OPEN_DECODER_FAIL);
             return;
         }
         if (codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
-                videoChannel = new VideoChannel;
-        }else if(codecpar->codec_type == AVMEDIA_TYPE_AUDIO){
-            audioChannel = new AudioChannel;
+            videoChannel = new VideoChannel(i,context);
+            videoChannel->setRenderFrameCallback(callback);
+        } else if (codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
+            audioChannel = new AudioChannel(i,context);
         }
     }
     //没有音视频（很少见）
-    if(!audioChannel && !videoChannel){
+    if (!audioChannel && !videoChannel) {
         LOGE("没有音视频");
         callHelper->onError(THREAD_CHILD, FFMPEG_NOMEDIA);
         return;
@@ -90,3 +91,37 @@ void DNFFmpeg::_parpare() {
 
 
 };
+void* play(void* args){
+    DNFFmpeg *ffmpeg = static_cast<DNFFmpeg *>(args);
+    ffmpeg->_start();
+    return 0;
+}
+void DNFFmpeg::start() {
+    isPlaying = 1;
+    if(videoChannel){
+        videoChannel->packets.setWork(1);
+        videoChannel->play();
+    }
+    pthread_create(&pid_play,0,play,this);
+}
+void DNFFmpeg::_start() {
+    int ret;
+    while (isPlaying){
+        AVPacket *packet = av_packet_alloc();
+     ret = av_read_frame(formatContext, packet);
+        if(ret == 0){
+            if(audioChannel && packet->stream_index == audioChannel->id){
+                //audioChannel->packets.enQueue(packet);
+            } else if(videoChannel && packet->stream_index == videoChannel->id){
+                videoChannel->packets.enQueue(packet);
+            }
+        } else if(ret == AVERROR_EOF){
+
+        } else{
+
+        }
+    }
+}
+void DNFFmpeg::setRenderFrameCallback(RenderFrameCallback callback) {
+    this->callback = callback;
+}

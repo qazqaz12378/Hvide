@@ -1,5 +1,6 @@
 package com.example.hyc.ffmpegtest;
 
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
@@ -43,7 +44,7 @@ public class DNPlayer implements SurfaceHolder.Callback {
         native_perpare(dataSource);
     }
     public void start() {
-
+        native_start();
     }
 
     public void stop() {
@@ -57,7 +58,7 @@ public class DNPlayer implements SurfaceHolder.Callback {
      */
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
-
+        native_setSurface(surfaceHolder.getSurface());
     }
 
     /**
@@ -81,4 +82,6 @@ public class DNPlayer implements SurfaceHolder.Callback {
 
     }
     native void native_perpare(String dataSource);
+    native void native_start();
+    native void native_setSurface(Surface surface);
 }

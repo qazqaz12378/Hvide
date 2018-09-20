@@ -18,7 +18,7 @@ public class MainActivity extends AppCompatActivity {
         SurfaceView surfaceView = findViewById(R.id.surfaceView);
         dnPlayer = new DNPlayer();
         dnPlayer.setSurfaceView(surfaceView);
-        dnPlayer.setDataSource("rtmp://live.hkstv.hk.lxdns.com/live//hks");
+        dnPlayer.setDataSource("rtmp://live.hkstv.hk.lxdns.com/live/hks");
         dnPlayer.setOnPrepareListener(new DNPlayer.OnPrepareListener() {
             @Override
             public void onPorepare() {
@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(MainActivity.this,"可以开始播放了",Toast.LENGTH_LONG).show();
                     }
                 });
+                dnPlayer.start();
             }
         });
     }

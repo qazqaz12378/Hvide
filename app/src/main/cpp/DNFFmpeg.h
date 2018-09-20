@@ -18,13 +18,19 @@ public:
     ~DNFFmpeg();
     void parpare();
     void _parpare();
+    void start();
+    void _start();
+    void setRenderFrameCallback(RenderFrameCallback callback);
 private:
     char *dataSource;
     pthread_t pid;
+    pthread_t  pid_play;
     AVFormatContext *formatContext;
     JavaCallHelper* callHelper;
-    AudioChannel *audioChannel;
-    VideoChannel *videoChannel;
+    AudioChannel *audioChannel = 0;
+    VideoChannel *videoChannel = 0;
+    RenderFrameCallback callback;
+    bool isPlaying;
 };
 
 
