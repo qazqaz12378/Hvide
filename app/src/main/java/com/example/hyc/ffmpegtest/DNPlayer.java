@@ -16,6 +16,7 @@ public class DNPlayer implements SurfaceHolder.Callback {
     private String dataSource;
     private SurfaceHolder holder;
     private OnPrepareListener listener;
+    private OnProgressListener onProgressListener;
     /**
      * 让使用设置播放的文件或者直播地址
      */
@@ -34,11 +35,23 @@ public class DNPlayer implements SurfaceHolder.Callback {
             listener.onPorepare();
         }
     }
+    /**
+     * native 回调给java 播放进去的
+     * @param progress
+     */
+    public void onProgress(int progress) {
+        if (null != onProgressListener) {
+            onProgressListener.onProgress(progress);
+        }
+    }
     public void setOnPrepareListener(OnPrepareListener listener){
         this.listener = listener;
     }
     public interface OnPrepareListener{
         void onPorepare();
+    }
+    public interface OnProgressListener {
+        void onProgress(int progress);
     }
     public void prepare(){
         native_perpare(dataSource);

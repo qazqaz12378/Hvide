@@ -9,14 +9,16 @@ extern "C" {
 };
 
 #include "safe_queue.h"
+#include "JavaCallHelper.h"
 
 class BaseChannel {
 public:
-    BaseChannel(int id,AVCodecContext* avCodecContext) : id(id),avCodecContext(avCodecContext) {}
+    BaseChannel(int id, AVCodecContext *avCodecContext, AVRational base) : id(id), avCodecContext(
+            avCodecContext), time_base(base) {}
 
     virtual ~BaseChannel() {
-        packets.setReleaseHandle(BaseChannel::releaseAvPacket);
-        packets.clear();
+        pkt_queue.setReleaseHandle(BaseChannel::releaseAvPacket);
+        pkt_queue.clear();
     }
 
     static void releaseAvPacket(AVPacket *&packet) {
@@ -25,19 +27,42 @@ public:
             packet = 0;
         }
     }
-    static void releaseAvFrame(AVFrame *&avFrame){
+
+    static void releaseAvFrame(AVFrame *&avFrame) {
         if (avFrame) {
             av_frame_free(&avFrame);
             avFrame = 0;
         }
     }
-    virtual void play() =0;
+
+    void clear() {
+        pkt_queue.clear();
+        frame_queue.clear();
+    }
+
+    void stopWork() {
+        pkt_queue.setWork(0);
+        frame_queue.setWork(0);
+    }
+
+    void startWork() {
+        pkt_queue.setWork(1);
+        frame_queue.setWork(1);
+    }
+
+    virtual void play() = 0;
+
+    virtual void stop() = 0;
 
     int id;
-
-    SafeQueue<AVPacket *> packets;
-    bool isPlaying;
-    AVCodecContext* avCodecContext;
+    double clock = 0;
+    SafeQueue<AVPacket *> pkt_queue;
+    SafeQueue<AVFrame *> frame_queue;
+    volatile bool isPlaying = false;
+    volatile int channelId;
+    AVCodecContext *avCodecContext;
+    AVRational time_base;
+    JavaCallHelper *javaCallHelper;
 };
 
 

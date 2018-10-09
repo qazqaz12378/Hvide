@@ -11,6 +11,7 @@
 
 extern "C" {
 #include <libavformat/avformat.h>
+#include <libavutil/time.h>
 }
 class DNFFmpeg {
 public:
@@ -25,12 +26,13 @@ private:
     char *dataSource;
     pthread_t pid;
     pthread_t  pid_play;
-    AVFormatContext *formatContext;
+    AVFormatContext *formatContext = 0;
     JavaCallHelper* callHelper;
     AudioChannel *audioChannel = 0;
     VideoChannel *videoChannel = 0;
     RenderFrameCallback callback;
     bool isPlaying;
+    pthread_mutex_t seekMutex;
 };
 
 

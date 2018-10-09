@@ -32,9 +32,9 @@ void DNFFmpeg::parpare() {
 void DNFFmpeg::_parpare() {
     //初始化网络
     avformat_network_init();
-    LOGE("asdddddddddd");
-    formatContext = 0;
-    int ret = avformat_open_input(&formatContext, dataSource, 0, 0);
+    AVDictionary *opts = NULL;
+    av_dict_set(&opts,"timeout","5000000",0);
+    int ret = avformat_open_input(&formatContext, dataSource, NULL, &opts);
     if (ret != 0) {
         LOGE("打开媒体失败:%s", av_err2str(ret));
         callHelper->onError(THREAD_CHILD, FFMPEG_CAN_NOT_OPEN_URL);
@@ -73,11 +73,13 @@ void DNFFmpeg::_parpare() {
             callHelper->onError(THREAD_CHILD, FFMPEG_OPEN_DECODER_FAIL);
             return;
         }
+        AVRational base = formatContext->streams[i]->time_base;
         if (codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
-            videoChannel = new VideoChannel(i,context);
+            int FPS = av_q2d(formatContext->streams[i]->avg_frame_rate);
+            videoChannel = new VideoChannel(i, context,base,FPS);
             videoChannel->setRenderFrameCallback(callback);
         } else if (codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
-            audioChannel = new AudioChannel(i,context);
+            audioChannel = new AudioChannel(i, context,base);
         }
     }
     //没有音视频（很少见）
@@ -91,37 +93,55 @@ void DNFFmpeg::_parpare() {
 
 
 };
-void* play(void* args){
+
+void *play(void *args) {
     DNFFmpeg *ffmpeg = static_cast<DNFFmpeg *>(args);
     ffmpeg->_start();
     return 0;
 }
+
 void DNFFmpeg::start() {
-    isPlaying = 1;
-    if(videoChannel){
-        videoChannel->packets.setWork(1);
+    isPlaying = true;
+    if (videoChannel) {
+        videoChannel->audioChannel = audioChannel;
         videoChannel->play();
     }
-    pthread_create(&pid_play,0,play,this);
+    if(audioChannel){
+        audioChannel->play();
+    }
+    pthread_create(&pid_play, 0, play, this);
 }
-void DNFFmpeg::_start() {
-    int ret;
-    while (isPlaying){
-        AVPacket *packet = av_packet_alloc();
-     ret = av_read_frame(formatContext, packet);
-        if(ret == 0){
-            if(audioChannel && packet->stream_index == audioChannel->id){
-                //audioChannel->packets.enQueue(packet);
-            } else if(videoChannel && packet->stream_index == videoChannel->id){
-                videoChannel->packets.enQueue(packet);
-            }
-        } else if(ret == AVERROR_EOF){
 
-        } else{
+void DNFFmpeg::_start() {
+    int ret = 0;
+    while (isPlaying) {
+        if(audioChannel && audioChannel->pkt_queue.size() > 100){
+            LOGE("audio 积压.");
+            av_usleep(1000 * 10);
+            continue;
+        }else if(videoChannel && videoChannel->pkt_queue.size() > 100){
+            LOGE("video 积压..");
+            av_usleep(1000 * 10);
+            continue;
+        }
+        pthread_mutex_lock(&seekMutex);
+        AVPacket *packet = av_packet_alloc();
+        ret = av_read_frame(formatContext, packet);
+        pthread_mutex_unlock(&seekMutex);
+        if (ret == 0) {
+            if (audioChannel && packet->stream_index == audioChannel->id) {
+                audioChannel->pkt_queue.enQueue(packet);
+            } else if (videoChannel && packet->stream_index == videoChannel->id) {
+                videoChannel->pkt_queue.enQueue(packet);
+            }
+        } else if (ret == AVERROR_EOF) {
+
+        } else {
 
         }
     }
 }
+
 void DNFFmpeg::setRenderFrameCallback(RenderFrameCallback callback) {
     this->callback = callback;
 }

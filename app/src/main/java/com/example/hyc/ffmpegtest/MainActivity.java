@@ -18,7 +18,7 @@ public class MainActivity extends AppCompatActivity {
         SurfaceView surfaceView = findViewById(R.id.surfaceView);
         dnPlayer = new DNPlayer();
         dnPlayer.setSurfaceView(surfaceView);
-        dnPlayer.setDataSource("rtmp://live.hkstv.hk.lxdns.com/live/hks");
+        dnPlayer.setDataSource("/sdcard/dong.mp4");
         dnPlayer.setOnPrepareListener(new DNPlayer.OnPrepareListener() {
             @Override
             public void onPorepare() {
@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
                 dnPlayer.start();
             }
         });
+        dnPlayer.prepare();
     }
     public void start(View view){
         dnPlayer.prepare();

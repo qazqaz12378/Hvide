@@ -7,14 +7,52 @@
 
 
 #include "BaseChannel.h"
+#include <SLES/OpenSLES_Android.h>
+#include "macro.h"
 
-class AudioChannel : public BaseChannel{
+extern "C" {
+#include <libswresample/swresample.h>
+
+}
+
+class AudioChannel : public BaseChannel {
 public:
-    AudioChannel(int id,AVCodecContext* avCodecContext);
+    AudioChannel(int id, AVCodecContext *avCodecContext,AVRational base);
+
     ~AudioChannel();
-    void play();
+
+    virtual void play();
+
+    virtual void stop();
+
     void decode();
+
     void render();
+
+    void initOpenSL();
+    int decodePcm();
+    int getPcm();
+    uint8_t *buffer;
+private:
+    pthread_t pid_audio_play;
+    pthread_t pid_audio_decode;
+
+    //opensl es
+    SLObjectItf engineObject = NULL;
+    SLEngineItf engineEngine;
+    //混音器
+    SLObjectItf outputMixObject = NULL;
+    SLEnvironmentalReverbItf outputMixEnvironmentalReverb = NULL;
+
+    SLObjectItf bqplayerObject = NULL;
+    SLPlayItf bqPlayerPlay = NULL;
+    SLAndroidSimpleBufferQueueItf bqPlayerBufferQueue = NULL;
+
+    SwrContext *swr_ctx = NULL;
+    int out_channels;
+    int out_samplesize;
+
+
 };
 
 

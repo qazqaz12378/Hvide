@@ -10,9 +10,9 @@
        android:id="@+id/surfaceView"
        android:layout_width="match_parent"
        android:layout_height="200dp" />
-    <Button
-        android:onClick="start"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="播放"/>
+    <!--<Button-->
+        <!--android:onClick="start"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="播放"/>-->
 </android.support.constraint.ConstraintLayout>
