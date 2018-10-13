@@ -12,10 +12,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.TextView;
 import android.widget.Toast;
-
-import static android.support.v4.content.PermissionChecker.PERMISSION_GRANTED;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -75,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
-
+//region 动态申请权限
     public void requestAllPower() {
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -109,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
+//endregion
     public void start() {
         dnPlayer.prepare();
     }
