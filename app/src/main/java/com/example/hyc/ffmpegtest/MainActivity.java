@@ -3,11 +3,13 @@ package com.example.hyc.ffmpegtest;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +21,7 @@ public class MainActivity extends AppCompatActivity {
     private DNPlayer dnPlayer;
     private SurfaceView surfaceView;
     private int height = 0;
+    private int curSystemUiVisibility = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            hideBottomUIMenu(true);
             //横屏
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager
                     .LayoutParams.FLAG_FULLSCREEN);
@@ -63,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
             m.height = m.MATCH_PARENT;
             surfaceView.setLayoutParams(m);
         } else {
+            hideBottomUIMenu(false);
             //竖屏
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
             ViewGroup.LayoutParams m = surfaceView.getLayoutParams();
@@ -72,7 +77,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
-//region 动态申请权限
+
+    //region 动态申请权限
     public void requestAllPower() {
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -84,8 +90,7 @@ public class MainActivity extends AppCompatActivity {
                         new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
                                 Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
             }
-        }else
-        {
+        } else {
             start();
         }
     }
@@ -106,7 +111,33 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-//endregion
+
+    //endregion
+// region 隐藏虚拟按键 并且全屏 true:隐藏   false:显示
+    protected void hideBottomUIMenu(boolean isHideMenu) {
+        if (Build.VERSION.SDK_INT > 11 && Build.VERSION.SDK_INT < 19) {
+            //低版本的
+            View v = this.getWindow().getDecorView();
+            if (isHideMenu) {
+                v.setSystemUiVisibility(View.GONE);
+            } else {
+                v.setSystemUiVisibility(0);
+            }
+        } else if (Build.VERSION.SDK_INT >= 19) {
+            View decorView = getWindow().getDecorView();
+            if (curSystemUiVisibility == 0)
+                curSystemUiVisibility = decorView.getSystemUiVisibility();
+            if(isHideMenu) {
+
+                int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_FULLSCREEN;
+                decorView.setSystemUiVisibility(uiOptions);
+            }else{
+                decorView.setSystemUiVisibility(0);
+            }
+        }
+    }
+
+    //endregion
     public void start() {
         dnPlayer.prepare();
     }
