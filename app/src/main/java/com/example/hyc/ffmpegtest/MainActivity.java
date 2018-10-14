@@ -1,6 +1,7 @@
 package com.example.hyc.ffmpegtest;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Build;
@@ -13,6 +14,7 @@ import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 
@@ -59,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
         super.onConfigurationChanged(newConfig);
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             hideBottomUIMenu(true);
+            keepScreenLongLight(this,true);
             //横屏
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager
                     .LayoutParams.FLAG_FULLSCREEN);
@@ -68,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
             surfaceView.setLayoutParams(m);
         } else {
             hideBottomUIMenu(false);
+            keepScreenLongLight(this,false);
             //竖屏
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
             ViewGroup.LayoutParams m = surfaceView.getLayoutParams();
@@ -127,13 +131,25 @@ public class MainActivity extends AppCompatActivity {
             View decorView = getWindow().getDecorView();
             if (curSystemUiVisibility == 0)
                 curSystemUiVisibility = decorView.getSystemUiVisibility();
-            if(isHideMenu) {
+            if (isHideMenu) {
 
                 int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_FULLSCREEN;
                 decorView.setSystemUiVisibility(uiOptions);
-            }else{
+            } else {
                 decorView.setSystemUiVisibility(0);
             }
+        }
+    }
+
+    //endregion
+
+    //region 屏幕是否常量 true:常量
+    protected static void keepScreenLongLight(Activity activity, boolean isOpenLight) {
+        Window window = activity.getWindow();
+        if (isOpenLight) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        } else {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
     }
 
