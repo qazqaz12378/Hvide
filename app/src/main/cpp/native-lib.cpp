@@ -58,7 +58,8 @@ Java_com_example_hyc_ffmpegtest_DNPlayer_native_1start(JNIEnv *env, jobject inst
 
     ffmpeg->start();
 
-}extern "C"
+}
+extern "C"
 JNIEXPORT void JNICALL
 Java_com_example_hyc_ffmpegtest_DNPlayer_native_1setSurface(JNIEnv *env, jobject instance,
                                                             jobject surface) {
@@ -70,7 +71,8 @@ Java_com_example_hyc_ffmpegtest_DNPlayer_native_1setSurface(JNIEnv *env, jobject
     }
     window = ANativeWindow_fromSurface(env, surface);
     pthread_mutex_unlock(&mutex);
-}extern "C"
+}
+extern "C"
 JNIEXPORT void JNICALL
 Java_com_example_hyc_ffmpegtest_DNPlayer_native_1stop(JNIEnv *env, jobject instance) {
 
@@ -79,7 +81,8 @@ Java_com_example_hyc_ffmpegtest_DNPlayer_native_1stop(JNIEnv *env, jobject insta
       //  DELETE(ffmpeg);
     }
 
-}extern "C"
+}
+extern "C"
 JNIEXPORT void JNICALL
 Java_com_example_hyc_ffmpegtest_DNPlayer_native_1release(JNIEnv *env, jobject instance) {
 
@@ -88,10 +91,11 @@ Java_com_example_hyc_ffmpegtest_DNPlayer_native_1release(JNIEnv *env, jobject in
         window=0;
     }
 
-}extern "C"
+}
+extern "C"
 JNIEXPORT void JNICALL
 Java_com_example_hyc_ffmpegtest_DNPlayer_native_1onResume(JNIEnv *env, jobject instance) {
-    
+
     if(ffmpeg){
 
 
