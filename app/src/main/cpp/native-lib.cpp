@@ -91,8 +91,7 @@ Java_com_example_hyc_ffmpegtest_DNPlayer_native_1release(JNIEnv *env, jobject in
 }extern "C"
 JNIEXPORT void JNICALL
 Java_com_example_hyc_ffmpegtest_DNPlayer_native_1onResume(JNIEnv *env, jobject instance) {
-
-    // TODO
+    
     if(ffmpeg){
 
 
