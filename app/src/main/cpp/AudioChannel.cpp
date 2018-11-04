@@ -45,14 +45,14 @@ void AudioChannel::play() {
     startWork();
     isPlaying = true;
     pthread_create(&pid_audio_play, NULL, audioPlay, this);
-    pthread_create(&pid_audio_decode,NULL,audioDecode,this);
+  //  pthread_create(&pid_audio_decode,NULL,audioDecode,this);
 }
 void AudioChannel::stop() {
 
 }
 void bqPlayerCalback(SLAndroidSimpleBufferQueueItf bq, void *context){
     AudioChannel *audioChannel =static_cast<AudioChannel *>(context);
-    int datalen = audioChannel->getPcm();
+    int datalen = audioChannel->decodePcm();
     if(datalen > 0){
         (*bq)->Enqueue(bq,audioChannel->buffer,datalen);
     }

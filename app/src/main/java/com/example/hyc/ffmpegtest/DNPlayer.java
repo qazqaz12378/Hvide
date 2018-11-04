@@ -61,9 +61,13 @@ public class DNPlayer implements SurfaceHolder.Callback {
     }
 
     public void stop() {
+        native_stop();
     }
     public void release(){
         holder.removeCallback(this);
+    }
+    public void onResume(){
+        native_onResume();
     }
     /**
      * 画布创建好了
@@ -97,4 +101,7 @@ public class DNPlayer implements SurfaceHolder.Callback {
     native void native_perpare(String dataSource);
     native void native_start();
     native void native_setSurface(Surface surface);
+    private native void native_stop();
+    private native void native_release();
+    private native void native_onResume();
 }

@@ -50,6 +50,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         requestAllPower();
+        surfaceView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                start();
+            }
+        });
     }
 
     public void start(View view) {
@@ -95,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
                                 Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
             }
         } else {
-            start();
+         //   start();
         }
     }
 
@@ -107,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
                 if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(this, "" + "权限" + permissions[i] + "申请成功", Toast.LENGTH_SHORT).show();
                     if (i > 0) {
-                        start();
+                      //  start();
                     }
                 } else {
                     Toast.makeText(this, "" + "权限" + permissions[i] + "申请失败", Toast.LENGTH_SHORT).show();
@@ -156,5 +162,23 @@ public class MainActivity extends AppCompatActivity {
     //endregion
     public void start() {
         dnPlayer.prepare();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        dnPlayer.stop();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        dnPlayer.onResume();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        dnPlayer.release();
     }
 }

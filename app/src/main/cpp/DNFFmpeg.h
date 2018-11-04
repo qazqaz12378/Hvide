@@ -22,6 +22,9 @@ public:
     void start();
     void _start();
     void setRenderFrameCallback(RenderFrameCallback callback);
+    void stop();
+    void release();
+    void Resume();
 private:
     char *dataSource;
     pthread_t pid;
@@ -33,6 +36,8 @@ private:
     RenderFrameCallback callback;
     bool isPlaying;
     pthread_mutex_t seekMutex;
+
+
 };
 
 

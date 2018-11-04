@@ -32,6 +32,17 @@ void dropFrame(queue<AVFrame *> &q){
         BaseChannel::releaseAvFrame(frame);
     }
 }
+void dropPacket(queue<AVPacket *> &q){
+    while(!q.empty()){
+        AVPacket *pkt = q.front();
+        if(pkt->flags != AV_PKT_FLAG_KEY){
+            q.pop();
+            BaseChannel::releaseAvPacket(pkt);
+        } else{
+            break;
+        }
+    }
+}
 VideoChannel::VideoChannel(int id, AVCodecContext *avCodecContext,AVRational base,int fps) : BaseChannel(id,
                                                                                  avCodecContext,base),fps(fps) {
     frame_queue.setReleaseHandle(releaseAvFrame);
@@ -39,7 +50,7 @@ VideoChannel::VideoChannel(int id, AVCodecContext *avCodecContext,AVRational bas
 }
 
 VideoChannel::~VideoChannel() {
-
+        frame_queue.clear();
 }
 
 void VideoChannel::play() {
@@ -65,7 +76,9 @@ void VideoChannel::decode() {
         }
         ret = avcodec_send_packet(avCodecContext, packet);
         releaseAvPacket(packet);
-        if (ret != 0) {
+        if (ret == AVERROR(EAGAIN)) {
+            continue;
+        }else if(ret < 0){
             break;
         }
         AVFrame *frame = av_frame_alloc();

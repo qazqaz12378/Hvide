@@ -17,6 +17,8 @@ DNFFmpeg::DNFFmpeg(JavaCallHelper *callHelper, const char *dataSource) {
     this->callHelper = callHelper;
     this->dataSource = new char[strlen(dataSource) + 1];
     strcpy(this->dataSource, dataSource);
+    isPlaying = false;
+    //duration = 0;
 }
 
 DNFFmpeg::~DNFFmpeg() {
@@ -115,6 +117,7 @@ void DNFFmpeg::start() {
 void DNFFmpeg::_start() {
     int ret = 0;
     while (isPlaying) {
+
         if(audioChannel && audioChannel->pkt_queue.size() > 100){
             LOGE("audio 积压.");
             av_usleep(1000 * 10);
@@ -124,10 +127,12 @@ void DNFFmpeg::_start() {
             av_usleep(1000 * 10);
             continue;
         }
-        pthread_mutex_lock(&seekMutex);
+
+       // pthread_mutex_lock(&seekMutex);
+
         AVPacket *packet = av_packet_alloc();
         ret = av_read_frame(formatContext, packet);
-        pthread_mutex_unlock(&seekMutex);
+        //pthread_mutex_unlock(&seekMutex);
         if (ret == 0) {
             if (audioChannel && packet->stream_index == audioChannel->id) {
                 audioChannel->pkt_queue.enQueue(packet);
@@ -140,8 +145,21 @@ void DNFFmpeg::_start() {
 
         }
     }
+    isPlaying = 0;
+    audioChannel->stop();
+    videoChannel->stop();
 }
 
 void DNFFmpeg::setRenderFrameCallback(RenderFrameCallback callback) {
     this->callback = callback;
+}
+void DNFFmpeg::stop() {
+    pthread_join(pid,0);
+    isPlaying = 0;
+    pthread_join(pid_play,0);
+}
+void DNFFmpeg::Resume(){
+    pthread_join(pid,0);
+    isPlaying = 1;
+    pthread_join(pid_play,0);
 }
