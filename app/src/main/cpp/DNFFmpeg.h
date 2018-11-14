@@ -25,6 +25,11 @@ public:
     void stop();
     void release();
     void Resume();
+    void Seek(int i);
+
+    int GetDUration(){
+        return duration;
+    }
 private:
     char *dataSource;
     pthread_t pid;
@@ -36,7 +41,7 @@ private:
     RenderFrameCallback callback;
     bool isPlaying;
     pthread_mutex_t seekMutex;
-
+    int duration;
 
 };
 

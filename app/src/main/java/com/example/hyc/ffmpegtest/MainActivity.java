@@ -16,15 +16,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener{
 
     private DNPlayer dnPlayer;
     private SurfaceView surfaceView;
     private int height = 0;
     private int curSystemUiVisibility = 0;
-
+    private SeekBar seekBar;
+    private TextView curTime;
+    private TextView totalTime;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,20 +39,46 @@ public class MainActivity extends AppCompatActivity {
         height = (int) (200 * scale + 0.5f);
         dnPlayer = new DNPlayer();
         dnPlayer.setSurfaceView(surfaceView);
-
-        dnPlayer.setDataSource("/sdcard/dong.mp4");
+        seekBar = findViewById(R.id.seekBar);
+        seekBar.setOnSeekBarChangeListener(this);
+        curTime = findViewById(R.id.currentTime);
+        totalTime = findViewById(R.id.totalTime);
         dnPlayer.setOnPrepareListener(new DNPlayer.OnPrepareListener() {
             @Override
             public void onPorepare() {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(MainActivity.this, "可以开始播放了", Toast.LENGTH_LONG).show();
-                    }
-                });
+                final int duration = dnPlayer.GetDUration();
+
+                if(duration != 0){
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            seekBar.setVisibility(View.VISIBLE);
+                            curTime.setVisibility(View.VISIBLE);
+                            totalTime.setVisibility(View.VISIBLE);
+                        }
+                    });
+                }
                 dnPlayer.start();
             }
         });
+        dnPlayer.setOnProgressListener(new DNPlayer.OnProgressListener() {
+            @Override
+            public void onProgress(final int progress) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        int duration = dnPlayer.GetDUration();
+                        if(duration !=0){
+                          seekBar.setProgress(progress * 100 / duration);
+                          curTime.setText(timeMParse(progress));
+                          totalTime.setText(timeMParse(duration));
+                        }
+                    }
+                });
+            }
+        });
+      //  dnPlayer.setDataSource("/sdcard/dong.mp4");
+        dnPlayer.setDataSource("http://101.44.1.126/mp4files/823300000775AEAC/vip.zuiku8.com/1810/%E9%BB%84%E9%87%91%E5%85%84%E5%BC%9F.HD1280%E9%AB%98%E6%B8%85%E5%9B%BD%E8%AF%AD%E4%B8%AD%E5%AD%97%E7%89%88.mp4");
         requestAllPower();
         surfaceView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -181,4 +211,60 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         dnPlayer.release();
     }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+
+    }
+
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+    }
+    /**
+     * Android 音乐播放器应用里，读出的音乐时长为 long 类型以毫秒数为单位，例如：将 234736 转化为分钟和秒应为 03:55 （包含四舍五入）
+     * @param duration 音乐时长
+     * @return
+     */
+    public static String timeParse(long duration) {
+        String time = "" ;
+        long minute = duration / 60000;
+        long seconds = duration % 60000;
+        long second = Math.round((float)seconds/1000) ;
+        if( minute < 10 ){
+            time += "0" ;
+        }
+        time += minute+":" ;
+        if( second < 10 ){
+            time += "0" ;
+        }
+        time += second ;
+        return time ;
+    }
+    /**
+     * Android 音乐播放器应用里，读出的音乐时长为 long 类型以毫秒数为单位，例如：将 234736 转化为分钟和秒应为 03:55 （包含四舍五入）
+     * @param duration 音乐时长   秒转换
+     * @return
+     */
+    public static String timeMParse(long duration) {
+        String time = "" ;
+        long minute = duration / 60;
+        long seconds = duration % 60;
+        long second = Math.round((float)seconds) ;
+        if( minute < 10 ){
+            time += "0" ;
+        }
+        time += minute+":" ;
+        if( second < 10 ){
+            time += "0" ;
+        }
+        time += second ;
+        return time ;
+    }
+
 }

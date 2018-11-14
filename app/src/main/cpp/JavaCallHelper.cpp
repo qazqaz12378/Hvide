@@ -23,7 +23,9 @@ void JavaCallHelper::onError(int thread, int errorCode) {
     }else
     {
         JNIEnv *env;
-        vm->AttachCurrentThread(&env,0);
+        if(vm->AttachCurrentThread(&env,0) != JNI_OK){
+            return;
+        }
         env->CallVoidMethod(instance,onErrorId,errorCode);
         vm->DetachCurrentThread();
     }
@@ -34,7 +36,9 @@ void JavaCallHelper::onPrepare(int thread) {
     }else
     {
         JNIEnv *env;
-        vm->AttachCurrentThread(&env,0);
+        if(vm->AttachCurrentThread(&env,0) != JNI_OK){
+            return;
+        }
         env->CallVoidMethod(instance,onPrepareId);
         vm->DetachCurrentThread();
     }

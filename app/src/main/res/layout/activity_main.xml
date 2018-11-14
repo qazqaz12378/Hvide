@@ -1,14 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context=".MainActivity">
 
    <SurfaceView
        android:id="@+id/surfaceView"
        android:layout_width="match_parent"
        android:layout_height="200dp" />
+   <LinearLayout
+       android:layout_width="match_parent"
+       android:layout_height="40dp"
+       android:id="@+id/layout_bottom"
+       android:layout_alignParentBottom="true"
+       android:gravity="center_vertical"
+       android:orientation="horizontal"
+       android:background="@drawable/bottom_backgroud"
+       >
+   <TextView
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:id="@+id/currentTime"
+       android:layout_marginLeft="16dp"
+       android:text="00:00"
+       android:textColor="#ffffff"/>
+      <SeekBar
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:id="@+id/seekBar"
+          android:progressDrawable="@drawable/jc_seek_progress"
+          android:thumb="@drawable/jc_seek_thumb"
+          android:layout_weight="1.0"
+          android:layout_gravity="center_vertical"
+          android:background="@null"
+          android:max="100"
+          android:maxHeight="4dp"
+          android:maxWidth="4dp"
+          android:paddingBottom="8dp"
+          android:paddingTop="8dp"
 
-</LinearLayout>
+          />
+
+      <TextView
+          android:id="@+id/totalTime"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="00:00"
+          android:textColor="#ffffff"
+          />
+      <ImageView
+          android:layout_width="wrap_content"
+          android:layout_height="fill_parent"
+          android:id="@+id/fullscreen"
+          android:paddingLeft="16dp"
+          android:paddingRight="16dp"
+          android:scaleType="center"
+          android:src="@drawable/jc_enlarge"/>
+   </LinearLayout>
+
+</RelativeLayout>

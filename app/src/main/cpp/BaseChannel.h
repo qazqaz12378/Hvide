@@ -13,7 +13,10 @@ extern "C" {
 
 class BaseChannel {
 public:
-    BaseChannel(int id, AVCodecContext *avCodecContext, AVRational base) : id(id), avCodecContext(
+    BaseChannel(int id,JavaCallHelper *javaCallHelper, AVCodecContext *avCodecContext,
+                AVRational base) : id(id),
+                                   javaCallHelper(javaCallHelper),
+                                   avCodecContext(
             avCodecContext), time_base(base) {}
 
     virtual ~BaseChannel() {

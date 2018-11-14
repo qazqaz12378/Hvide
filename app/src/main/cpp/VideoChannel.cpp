@@ -43,7 +43,7 @@ void dropPacket(queue<AVPacket *> &q){
         }
     }
 }
-VideoChannel::VideoChannel(int id, AVCodecContext *avCodecContext,AVRational base,int fps) : BaseChannel(id,
+VideoChannel::VideoChannel(int id, JavaCallHelper *javaCallHelper,AVCodecContext *avCodecContext,AVRational base,int fps) : BaseChannel(id,javaCallHelper,
                                                                                  avCodecContext,base),fps(fps) {
     frame_queue.setReleaseHandle(releaseAvFrame);
     frame_queue.setSyncHandle(dropFrame);
@@ -166,6 +166,10 @@ void VideoChannel::render() {
         }
 
 #endif
+        if(javaCallHelper && !audioChannel){
+            javaCallHelper->onProgress(THREAD_CHILD,clock);
+        }
+
         sws_scale(swsContext, reinterpret_cast<const uint8_t *const *> (frame->data),
                   frame->linesize, 0, avCodecContext->height, dst_data, dst_linesize);
         callback(dst_data[0], dst_linesize[0], avCodecContext->width,

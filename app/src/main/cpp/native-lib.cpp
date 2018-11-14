@@ -101,3 +101,14 @@ Java_com_example_hyc_ffmpegtest_DNPlayer_native_1onResume(JNIEnv *env, jobject i
 
     }
 }
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_example_hyc_ffmpegtest_DNPlayer_native_1GetDuration(JNIEnv *env, jobject instance) {
+
+    if(ffmpeg){
+        return ffmpeg->GetDUration();
+    }
+    return 0;
+
+}

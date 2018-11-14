@@ -47,6 +47,9 @@ public class DNPlayer implements SurfaceHolder.Callback {
     public void setOnPrepareListener(OnPrepareListener listener){
         this.listener = listener;
     }
+    public void setOnProgressListener(OnProgressListener onProgressListener){
+        this.onProgressListener = onProgressListener;
+    }
     public interface OnPrepareListener{
         void onPorepare();
     }
@@ -68,6 +71,9 @@ public class DNPlayer implements SurfaceHolder.Callback {
     }
     public void onResume(){
         native_onResume();
+    }
+    public int GetDUration(){
+        return native_GetDuration();
     }
     /**
      * 画布创建好了
@@ -104,4 +110,5 @@ public class DNPlayer implements SurfaceHolder.Callback {
     private native void native_stop();
     private native void native_release();
     private native void native_onResume();
+    private  native int native_GetDuration();
 }

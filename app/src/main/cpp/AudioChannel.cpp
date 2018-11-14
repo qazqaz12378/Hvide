@@ -18,8 +18,8 @@ void *audioDecode(void *args){
     audio->decode();
     return 0;
 }
-AudioChannel::AudioChannel(int id, AVCodecContext *avCodecContext,AVRational base) : BaseChannel(id,
-                                                                                 avCodecContext,base) {
+AudioChannel::AudioChannel(int id,JavaCallHelper *javaCallHelper, AVCodecContext *avCodecContext,AVRational base) : BaseChannel(id,
+                                                                                 javaCallHelper,avCodecContext,base) {
     //根据布局获取声道数
     out_channels = av_get_channel_layout_nb_channels(AV_CH_LAYOUT_STEREO);
     out_samplesize = av_get_bytes_per_sample(AV_SAMPLE_FMT_S16);
@@ -168,6 +168,9 @@ int AudioChannel::decodePcm() {
         data_size = nb * out_channels * out_samplesize;
         //音频的时间
         clock = frame->best_effort_timestamp * av_q2d(time_base);
+        if(javaCallHelper){
+            javaCallHelper->onProgress(THREAD_CHILD,clock);
+        }
         break;
     }
     releaseAvFrame(frame);

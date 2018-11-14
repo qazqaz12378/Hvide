@@ -48,6 +48,7 @@ void DNFFmpeg::_parpare() {
         callHelper->onError(THREAD_CHILD, FFMPEG_CAN_NOT_FIND_STREAMS);
         return;
     }
+    duration = formatContext->duration / 1000000;
     for (int i = 0; i < formatContext->nb_streams; ++i) {
         AVStream *stream = formatContext->streams[i];
         AVCodecParameters *codecpar = stream->codecpar;
@@ -78,10 +79,10 @@ void DNFFmpeg::_parpare() {
         AVRational base = formatContext->streams[i]->time_base;
         if (codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
             int FPS = av_q2d(formatContext->streams[i]->avg_frame_rate);
-            videoChannel = new VideoChannel(i, context,base,FPS);
+            videoChannel = new VideoChannel(i, callHelper,context,base,FPS);
             videoChannel->setRenderFrameCallback(callback);
         } else if (codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
-            audioChannel = new AudioChannel(i, context,base);
+            audioChannel = new AudioChannel(i,callHelper, context,base);
         }
     }
     //没有音视频（很少见）
@@ -117,7 +118,7 @@ void DNFFmpeg::start() {
 void DNFFmpeg::_start() {
     int ret = 0;
     while (isPlaying) {
-
+        LOGE("数据 %d:",formatContext->pb->pos);
         if(audioChannel && audioChannel->pkt_queue.size() > 100){
             LOGE("audio 积压.");
             av_usleep(1000 * 10);
